@@ -1,0 +1,331 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Days Of Adithya | Video Store</title>
+<style>
+:root{--bg:#080d17;--panel:#111a29;--green:#16a34a;--white:#f8fafc;--muted:#94a3b8}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--white);font-family:Arial,sans-serif}
+button,input,textarea{font:inherit}
+button{cursor:pointer;border:0;border-radius:9px;padding:12px 17px;font-weight:bold}
+.green{background:var(--green);color:white}
+.secondary{background:#263449;color:white}
+header{display:flex;align-items:center;justify-content:space-between;padding:17px 5%;background:#0d1421;border-bottom:1px solid #263449;gap:12px;flex-wrap:wrap}
+.logo{font-size:21px;font-weight:800;color:white}
+.logo span{color:#22c55e}
+nav{display:flex;gap:9px;flex-wrap:wrap}
+main{max-width:1150px;margin:auto;padding:25px 18px}
+.hero{padding:35px 25px;background:linear-gradient(120deg,#142b28,#111a29 70%);border-radius:18px;margin-bottom:28px}
+h1{font-size:clamp(28px,5vw,43px);margin:10px 0}
+h2{margin-top:25px}
+p{color:var(--muted);line-height:1.6}
+input,textarea{width:100%;padding:12px;background:#0b1220;color:white;border:1px solid #344256;border-radius:8px;margin:6px 0 14px}
+label{font-size:14px;color:#cbd5e1}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:20px}
+.card{background:var(--panel);border:1px solid #253348;border-radius:13px;overflow:hidden}
+.thumb{width:100%;height:165px;object-fit:cover;background:#263449;display:block}
+.card-body{padding:15px}
+.price{font-size:20px;font-weight:bold;margin:14px 0}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.row>*{flex:1}
+.page{max-width:500px;margin:45px auto;background:var(--panel);padding:25px;border-radius:15px}
+.hidden{display:none!important}
+.notice{padding:12px;border-radius:8px;background:#17283a;margin:12px 0;color:#cbd5e1}
+footer{text-align:center;padding:30px;color:var(--muted)}
+button:hover{filter:brightness(1.12)}
+.small{font-size:13px}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo" id="brand">▶ <span>Days</span> Of Adithya</div>
+  <nav>
+    <button class="secondary" onclick="home()">Home</button>
+    <button class="secondary" onclick="show('ownerChoice')">Owner</button>
+  </nav>
+</header>
+
+<main>
+  <section id="ownerChoice" class="page">
+    <h1>Welcome!</h1>
+    <p>Are you the owner of Days Of Adithya?</p>
+    <div class="row">
+      <button class="green" onclick="show('login')">Yes, I'm Owner</button>
+      <button class="secondary" onclick="home()">No, I'm a Customer</button>
+    </div>
+  </section>
+
+  <section id="login" class="page hidden">
+    <h2>🔐 Owner Login</h2>
+    <p>Enter your owner password.</p>
+    <form onsubmit="loginOwner(event)">
+      <label>Password</label>
+      <input id="password" type="password" required placeholder="Enter owner password">
+      <button class="green" type="submit">Login</button>
+      <button class="secondary" type="button" onclick="home()">Back</button>
+    </form>
+    <p id="loginError"></p>
+  </section>
+
+  <section id="store" class="hidden">
+    <div class="hero">
+      <p>WELCOME TO YOUR VIDEO STORE</p>
+      <h1>Days Of Adithya 🎬</h1>
+      <p>Discover premium videos. Choose your favourite and enjoy!</p>
+      <input id="search" placeholder="Search videos..." oninput="renderVideos()">
+    </div>
+    <h2>🎥 Available Videos</h2>
+    <div id="videos" class="grid"></div>
+  </section>
+
+  <section id="dashboard" class="hidden">
+    <h1>Owner Dashboard</h1>
+    <p>Manage your video store from one place.</p>
+    <div class="notice">Demo mode: changes are stored in this browser. Secure login, cloud uploads and real payments require a backend.</div>
+
+    <h2>➕ Upload a Video</h2>
+    <form id="uploadForm" class="card card-body" onsubmit="addVideo(event)">
+      <label>Video title</label>
+      <input id="title" required placeholder="Enter video title">
+      <label>Description</label>
+      <textarea id="description" placeholder="Video description"></textarea>
+      <label>Price (LKR)</label>
+      <input id="price" type="number" min="1" step="1" required placeholder="500">
+      <label>Video file</label>
+      <input id="videoFile" type="file" accept="video/*" required>
+      <label>Thumbnail image</label>
+      <input id="imageFile" type="file" accept="image/*" required>
+      <button class="green" type="submit">Upload Video</button>
+    </form>
+
+    <h2>⚙️ Website Settings</h2>
+    <div class="card card-body">
+      <label>Website name / logo text</label>
+      <input id="newBrand" placeholder="Days Of Adithya">
+      <button class="green" onclick="changeBrand()">Save Website Name</button>
+      <hr style="border-color:#344256;margin:24px 0">
+      <label>Change owner password</label>
+      <input id="oldPass" type="password" placeholder="Current password">
+      <input id="newPass" type="password" placeholder="New password (minimum 6 characters)">
+      <button class="green" onclick="changePassword()">Update Password</button>
+      <p id="settingsMsg"></p>
+    </div>
+
+    <h2>📹 Manage Videos</h2>
+    <div id="manageVideos" class="grid"></div>
+    <button class="secondary" onclick="home()">View Customer Store</button>
+    <button class="secondary" onclick="logout()">Logout</button>
+  </section>
+
+  <section id="checkout" class="page hidden">
+    <h2>🛒 Checkout</h2>
+    <div id="orderDetails"></div>
+    <p>Select your payment method.</p>
+    <div class="notice">💳 Bank card payment (Visa / Mastercard)</div>
+    <p class="small">This is a demonstration checkout. No real payment will be charged.</p>
+    <button class="green" onclick="demoPayment()">Continue to Demo Payment</button>
+    <button class="secondary" onclick="home()">Cancel</button>
+    <p id="paymentMsg"></p>
+  </section>
+</main>
+
+<footer>© <span id="year"></span> Days Of Adithya · All rights reserved.</footer>
+
+<script>
+let ownerPassword = "hptq536";
+let isOwner = false;
+let pendingVideo = null;
+let videos = [];
+let nextId = 1;
+
+// Demo video records and file previews remain in browser memory.
+const $ = id => document.getElementById(id);
+
+function show(id) {
+  ["ownerChoice","login","store","dashboard","checkout"].forEach(
+    name => $(name).classList.toggle("hidden", name !== id)
+  );
+}
+
+function home() {
+  renderVideos();
+  show("store");
+}
+
+function loginOwner(event) {
+  event.preventDefault();
+  if ($("password").value === ownerPassword) {
+    isOwner = true;
+    $("password").value = "";
+    $("loginError").textContent = "";
+    renderManage();
+    show("dashboard");
+  } else {
+    $("loginError").textContent = "Incorrect password. Please try again.";
+  }
+}
+
+function logout() {
+  isOwner = false;
+  show("store");
+}
+
+function addVideo(event) {
+  event.preventDefault();
+  if (!isOwner) return alert("Owner login required.");
+
+  const videoFile = $("videoFile").files[0];
+  const imageFile = $("imageFile").files[0];
+
+  if (!videoFile || !imageFile) {
+    alert("Please select a video and a thumbnail.");
+    return;
+  }
+
+  if (!videoFile.type.startsWith("video/") ||
+      !imageFile.type.startsWith("image/")) {
+    alert("Choose a valid video and image file.");
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = () => {
+    const thumb = reader.result;
+    const videoURL = URL.createObjectURL(videoFile);
+
+    videos.push({
+      id: nextId++,
+      title: $("title").value.trim(),
+      description: $("description").value.trim(),
+      price: Number($("price").value),
+      thumb,
+      videoURL,
+      file: videoFile
+    });
+
+    $("uploadForm").reset();
+    renderVideos();
+    renderManage();
+    alert("Video added to this demo!");
+  };
+  reader.readAsDataURL(imageFile);
+}
+
+function renderVideos() {
+  const query = ($("search")?.value || "").toLowerCase();
+  const list = videos.filter(v =>
+    v.title.toLowerCase().includes(query) ||
+    v.description.toLowerCase().includes(query)
+  );
+
+  $("videos").innerHTML = list.length ? list.map(v => `
+    <article class="card">
+      <img class="thumb" src="${v.thumb}" alt="Video thumbnail">
+      <div class="card-body">
+        <h3>${escapeHTML(v.title)}</h3>
+        <p>${escapeHTML(v.description || "Premium video")}</p>
+        <div class="price">Rs. ${v.price.toLocaleString("en-LK")}</div>
+        <button class="green" onclick="buy(${v.id})">Buy Now</button>
+      </div>
+    </article>`).join("") :
+    `<div class="notice">No videos yet. ${isOwner ? "Upload your first video in the dashboard." : "Please check back soon."}</div>`;
+}
+
+function renderManage() {
+  if (!isOwner) return;
+  $("manageVideos").innerHTML = videos.length ? videos.map(v => `
+    <article class="card card-body">
+      <img class="thumb" src="${v.thumb}" alt="Thumbnail">
+      <h3>${escapeHTML(v.title)}</h3>
+      <p>Rs. ${v.price.toLocaleString("en-LK")}</p>
+      <button class="secondary" onclick="editVideo(${v.id})">Edit</button>
+      <button class="secondary" onclick="deleteVideo(${v.id})">Delete</button>
+    </article>`).join("") : "<p>No videos uploaded yet.</p>";
+}
+
+function editVideo(id) {
+  if (!isOwner) return;
+  const v = videos.find(item => item.id === id);
+  if (!v) return;
+  const title = prompt("Video title:", v.title);
+  if (title === null) return;
+  const price = prompt("Price in LKR:", v.price);
+  if (price === null) return;
+  if (!title.trim() || !Number.isFinite(Number(price)) || Number(price) <= 0) {
+    alert("Enter a valid title and price.");
+    return;
+  }
+  v.title = title.trim();
+  v.price = Number(price);
+  renderManage();
+  renderVideos();
+}
+
+function deleteVideo(id) {
+  if (!isOwner || !confirm("Delete this video from the demo?")) return;
+  const index = videos.findIndex(v => v.id === id);
+  if (index >= 0) {
+    URL.revokeObjectURL(videos[index].videoURL);
+    videos.splice(index, 1);
+  }
+  renderManage();
+  renderVideos();
+}
+
+function buy(id) {
+  pendingVideo = videos.find(v => v.id === id);
+  if (!pendingVideo) return;
+  $("orderDetails").innerHTML = `
+    <h3>${escapeHTML(pendingVideo.title)}</h3>
+    <p>Total: <strong>Rs. ${pendingVideo.price.toLocaleString("en-LK")}</strong></p>`;
+  $("paymentMsg").textContent = "";
+  show("checkout");
+}
+
+function demoPayment() {
+  $("paymentMsg").textContent =
+    "Demo only: no payment was made. Connect a real payment gateway to complete purchases.";
+}
+
+function changeBrand() {
+  if (!isOwner) return;
+  const name = $("newBrand").value.trim();
+  if (!name) return alert("Enter a website name.");
+  $("brand").textContent = "▶ " + name;
+  $("newBrand").value = "";
+  $("settingsMsg").textContent = "Name changed for this session.";
+}
+
+function changePassword() {
+  if (!isOwner) return;
+  if ($("oldPass").value !== ownerPassword) {
+    $("settingsMsg").textContent = "Current password is incorrect.";
+    return;
+  }
+  const next = $("newPass").value;
+  if (next.length < 6) {
+    $("settingsMsg").textContent = "New password must be at least 6 characters.";
+    return;
+  }
+  ownerPassword = next;
+  $("oldPass").value = "";
+  $("newPass").value = "";
+  $("settingsMsg").textContent = "Password updated for this session only.";
+}
+
+function escapeHTML(value) {
+  return String(value).replace(/[&<>"']/g, ch => ({
+    "&":"&amp;", "<":"&lt;", ">":"&gt;",
+    '"':"&quot;", "'":"&#39;"
+  })[ch]);
+}
+
+$("year").textContent = new Date().getFullYear();
+show("ownerChoice");
+</script>
+</body>
+</html>
